@@ -1,46 +1,29 @@
-const express = require('express');
-const cors = require('cors');
-require('dotenv').config();
-const connectDB = require('./config/db');
+ const express = require('express');
+ const cors = require('cors');
+ require('dotenv').config();
+ const connectDB = require('./config/db');
++const AdminUser = require('./models/AdminUser');
 
-const app = express();
+ const app = express();
 
-connectDB();
+ connectDB();
 
-// Accepts CLIENT_URL exactly (your custom domain / primary Vercel domain)
-// plus any Vercel preview or deployment-alias URL for this project
-const vercelProjectPattern = /^https:\/\/branplate-q6sx(-[a-z0-9]+)*-thelegend9\.vercel\.app$/;
-
-app.use(cors({
-  origin: (origin, callback) => {
-    if (!origin) return callback(null, true); // non-browser requests
-    const allowed =
-      origin === process.env.CLIENT_URL ||
-      vercelProjectPattern.test(origin);
-    callback(allowed ? null : new Error(`CORS blocked for origin: ${origin}`), allowed);
-  }
-}));
-app.use(express.json());
-
-// ---- API Reference ----
-// Auth (customer):   POST /api/auth/register, POST /api/auth/login, GET /api/auth/me
-// Admin auth:         POST /api/admin/auth/signup, POST /api/admin/auth/login,
-//                      GET /api/admin/auth/admins, POST /api/admin/auth/admins, DELETE /api/admin/auth/admins/:id
-// Products:           GET /api/products, GET /api/products/:id, GET /api/products/admin/all,
-//                      POST /api/products, PUT /api/products/:id, DELETE /api/products/:id
-// Orders:             POST /api/orders, GET /api/orders/mine, GET /api/orders/:id,
-//                      GET /api/orders/admin/all?type=completed|incomplete, PUT /api/orders/admin/:id/status
-// Contact/Refunds:    POST /api/contact, GET /api/contact/admin, PUT /api/contact/admin/:id
-// Settings:           GET /api/settings/contact, PUT /api/settings/contact
-
-app.use('/api/auth', require('./routes/authRoutes'));
-app.use('/api/admin/auth', require('./routes/adminAuthRoutes'));
-app.use('/api/products', require('./routes/productRoutes'));
-app.use('/api/orders', require('./routes/orderRoutes'));
-app.use('/api/contact', require('./routes/contactRoutes'));
-app.use('/api/settings', require('./routes/settingsRoutes'));
-
-app.get('/', (req, res) => res.send('BranPlate API is running'));
-
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`BranPlate server running on port ${PORT}`));
++// One-time, idempotent bootstrap: whitelist FIRST_ADMIN_EMAIL as an admin
++// if it isn't already in the DB. Safe to run on every startup — it only
++// inserts when the record is missing, so redeploys won't duplicate it.
++// This replaces having to run `npm run seed` manually via a shell.
++(async () => {
++  const firstAdminEmail = (process.env.FIRST_ADMIN_EMAIL || '').toLowerCase();
++  if (!firstAdminEmail) return;
++  try {
++    const exists = await AdminUser.findOne({ email: firstAdminEmail });
++    if (!exists) {
++      await AdminUser.create({ email: firstAdminEmail, role: 'owner' });
++      console.log(`Whitelisted first admin on startup: ${firstAdminEmail}`);
++    }
++  } catch (err) {
++    console.error('First-admin bootstrap failed:', err.message);
++  }
++})();
++
+ // Accepts CLIENT_URL exactly (your custom domain / primary Vercel domain)
