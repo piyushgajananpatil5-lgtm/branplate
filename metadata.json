@@ -1,0 +1,6 @@
+{
+  "name": "BranPlate",
+  "description": "BranPlate — 100% Biodegradable Wheat Bran Plates crafted from upcycled agricultural byproduct in Central India. MERN stack application ready for Vercel and Render.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
