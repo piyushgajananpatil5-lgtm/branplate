@@ -38,6 +38,10 @@ app.get('/api/health', (_req, res) => {
   res.json({ status: 'ok', mongoConnected: true });
 });
 
+app.get('/', (_req, res) => {
+  res.json({ status: 'ok', service: 'BranPlate API', health: '/api/health' });
+});
+
 app.get('/api/admin/auth/signup', (_req, res) => {
   res.status(405).json({ message: 'Use POST /api/admin/auth/signup to set an admin password.' });
 });

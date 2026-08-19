@@ -14,8 +14,12 @@ const signAdminToken = (admin) =>
 // Sets the password for that whitelist entry the first time.
 router.post('/signup', async (req, res) => {
   try {
-    const { email, password } = req.body;
-    const admin = await AdminUser.findOne({ email: (email || '').toLowerCase() });
+    const email = String(req.body.email || '').trim().toLowerCase();
+    const password = String(req.body.password || '');
+    if (!email.endsWith('@gmail.com') || password.length < 6) {
+      return res.status(400).json({ message: 'A valid Gmail address and password of at least 6 characters are required.' });
+    }
+    const admin = await AdminUser.findOne({ email });
     if (!admin) {
       return res.status(403).json({ message: 'This email is not on the admin whitelist. Ask an existing admin to add it first.' });
     }
