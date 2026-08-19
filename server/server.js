@@ -5,6 +5,11 @@ const connectDB = require('./config/db');
 
 const app = express();
 const port = Number(process.env.PORT || 5000);
+const requiredEnv = ['MONGO_URI', 'JWT_SECRET', 'FIRST_ADMIN_EMAIL'];
+const missingEnv = requiredEnv.filter((key) => !String(process.env[key] || '').trim());
+if (missingEnv.length) {
+  throw new Error(`Missing required environment variables: ${missingEnv.join(', ')}`);
+}
 const allowedOrigins = new Set([
   'https://www.thelegend5.com',
   'https://thelegend5.com',
