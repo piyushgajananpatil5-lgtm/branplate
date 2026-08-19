@@ -19,9 +19,19 @@ router.post('/signup', async (req, res) => {
     if (!email.endsWith('@gmail.com') || password.length < 6) {
       return res.status(400).json({ message: 'A valid Gmail address and password of at least 6 characters are required.' });
     }
-    const admin = await AdminUser.findOne({ email });
+    let admin = await AdminUser.findOne({ email });
+    if (!admin) {
+      const firstAdminEmail = String(process.env.FIRST_ADMIN_EMAIL || '').trim().toLowerCase();
+      const anyAdminExists = await AdminUser.exists({});
+      if (firstAdminEmail && email === firstAdminEmail && !anyAdminExists) {
+        admin = await AdminUser.create({ email, role: 'owner', isActive: true });
+      }
+    }
     if (!admin) {
       return res.status(403).json({ message: 'This email is not on the admin whitelist. Ask an existing admin to add it first.' });
+    }
+    if (!admin.isActive) {
+      return res.status(403).json({ message: 'This administrator account is inactive. Ask an existing admin to reactivate it.' });
     }
     if (admin.password) {
       return res.status(400).json({ message: 'This admin account already has a password. Please log in instead.' });
