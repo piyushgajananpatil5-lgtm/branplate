@@ -18,12 +18,28 @@ const corsOptions = {
   allowedHeaders: ['Content-Type', 'Authorization']
 };
 
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+  if (origin && allowedOrigins.has(origin)) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+    res.setHeader('Vary', 'Origin');
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
+  }
+  res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,PATCH,DELETE,OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  if (req.method === 'OPTIONS')
+    return res.sendStatus(204);
+  next();
+});
 app.use(cors(corsOptions));
-app.options('*', cors(corsOptions));
 app.use(express.json({ limit: '1mb' }));
 
 app.get('/api/health', (_req, res) => {
   res.json({ status: 'ok', mongoConnected: true });
+});
+
+app.get('/api/admin/auth/signup', (_req, res) => {
+  res.status(405).json({ message: 'Use POST /api/admin/auth/signup to set an admin password.' });
 });
 
 app.use('/api/auth', require('./routes/authRoutes'));
