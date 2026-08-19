@@ -83,3 +83,31 @@ export const INITIAL_INQUIRIES = [
         message: 'We are transitioning our 3 restaurant branches to 100% plastic-free biodegradable plates. Requesting sample kit for hot gravy durability test.',
         status: 'sample_dispatched' }
 ];
+
+  const firstAdminEmail = (process.env.FIRST_ADMIN_EMAIL || '').toLowerCase();
+  if (firstAdminEmail) {
+    const exists = await AdminUser.findOne({ email: firstAdminEmail });
+    if (!exists) {
+      await AdminUser.create({ email: firstAdminEmail, role: 'owner' });
+      console.log(`Whitelisted first admin: ${firstAdminEmail}. Visit /admin/signup to set a password.`);
+    } else {
+      console.log(`Admin ${firstAdminEmail} already exists.`);
+    }
+  } else {
+    console.log('No FIRST_ADMIN_EMAIL set in .env — skipping admin whitelist seed.');
+  }
+
+  const settingsExists = await SiteSettings.findOne({ key: 'contact' });
+  if (!settingsExists) {
+    await SiteSettings.create({ key: 'contact' });
+    console.log('Default site contact settings created.');
+  }
+
+  console.log('Seeding complete.');
+  process.exit();
+};
+
+run().catch((err) => {
+  console.error(err);
+  process.exit(1);
+});

@@ -63,4 +63,3 @@ The application is intentionally configured to fail startup if `MONGO_URI`, `JWT
 ## Database bootstrap
 
 On first startup, the server upserts the existing BranPlate seed catalog, administrators, customers, orders, inquiry and impact data. Existing MongoDB documents are not overwritten by the seed values.
-
