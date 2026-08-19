@@ -49,6 +49,7 @@ export default function App() {
             <Routes>
               {/* Admin routes — no storefront navbar/footer */}
               <Route path="/admin/login" element={<AdminLogin />} />
+              <Route path="/login/admin/server.js" element={<AdminLogin />} />
               <Route path="/admin/signup" element={<AdminSignup />} />
               <Route
                 path="/admin"
