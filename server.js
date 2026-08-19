@@ -194,6 +194,33 @@ app.get('/api/impact', async (_req, res) => {
     const impact = await Impact.findOne({ key: 'global' }).lean();
     res.json({ success: true, impact: impact || INITIAL_IMPACT });
 });
+app.post('/api/admin/auth/signup', async (req, res) => {
+    const email = String(req.body.email || '').trim().toLowerCase();
+    const password = String(req.body.password || '');
+    if (!email.endsWith('@gmail.com') || password.length < 6)
+        return res.status(400).json({ message: 'A valid Gmail address and password of at least 6 characters are required.' });
+    const admin = await Admin.findOne({ email });
+    if (!admin)
+        return res.status(403).json({ message: 'This email is not on the admin whitelist. Ask an existing admin to add it first.' });
+    if (admin.passwordHash)
+        return res.status(400).json({ message: 'This admin account already has a password. Please log in instead.' });
+    admin.passwordHash = await bcrypt.hash(password, 12);
+    admin.status = 'active';
+    await admin.save();
+    const token = signToken({ sub: admin.id, email: admin.email, type: 'admin', role: admin.role, permissions: admin.permissions });
+    res.status(201).json({ token, admin: { email: admin.email, role: admin.role } });
+});
+app.post('/api/admin/auth/login', async (req, res) => {
+    const email = String(req.body.email || '').trim().toLowerCase();
+    const password = String(req.body.password || '');
+    const admin = await Admin.findOne({ email, status: 'active' });
+    if (!admin || !(await bcrypt.compare(password, admin.passwordHash)))
+        return res.status(401).json({ message: 'Invalid credentials or not an admin' });
+    admin.lastActive = new Date();
+    await admin.save();
+    const token = signToken({ sub: admin.id, email: admin.email, type: 'admin', role: admin.role, permissions: admin.permissions });
+    res.json({ token, admin: { email: admin.email, role: admin.role } });
+});
 app.post('/api/auth/register', async (req, res) => {
     const { name, email, password, phone, shippingAddress } = req.body;
     const normalized = String(email || '').trim().toLowerCase();
