@@ -2,9 +2,10 @@ services:
   - type: web
     name: branplate-service
     env: node
+    rootDir: server
     plan: starter
     region: singapore
-    buildCommand: npm install && npm run build
+    buildCommand: npm install
     startCommand: npm start
     envVars:
       - key: NODE_ENV
