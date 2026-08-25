@@ -1,17 +1,43 @@
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;700&display=swap');
 @import "tailwindcss";
 
 @layer base {
   body {
-    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-family: 'DM Sans', sans-serif;
+    background: #f3ead9;
   }
   
   h1, h2, h3, h4, .font-serif {
-    font-family: 'Playfair Display', Georgia, serif;
+    font-family: 'Bebas Neue', Impact, sans-serif;
+    letter-spacing: 0;
   }
 
   .font-mono {
     font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   }
+}
+
+@keyframes product-rise {
+  from { opacity: 0; transform: translateY(28px) rotate(2deg); }
+  to { opacity: 1; transform: translateY(0) rotate(0); }
+}
+
+.product-rise {
+  animation: product-rise 700ms cubic-bezier(.2,.8,.2,1) both;
+}
+
+.plate-packaging {
+  background: linear-gradient(145deg, #e8a83e 0%, #d78628 100%);
+  box-shadow: 14px 16px 0 #173f35;
+  transform: rotate(2deg);
+}
+
+.plate-packaging::after {
+  content: '';
+  position: absolute;
+  inset: 10px;
+  border: 2px solid rgba(255, 247, 224, .65);
+  pointer-events: none;
 }
 
 /* Custom scrollbar hiding utility */

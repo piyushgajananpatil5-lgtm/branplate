@@ -38,18 +38,18 @@ export const ProductCatalog: React.FC<ProductCatalogProps> = ({
   const currentPack = currentProduct.packSizes[currentPackIndex] || currentProduct.packSizes[0] || { price: currentProduct.price, label: 'Standard Pack', size: 25, unitPrice: currentProduct.price / 25 };
 
   return (
-    <section id="shop-section" className="py-16 bg-[#FAF8F5]">
+    <section id="shop-section" className="py-20 bg-[#173F35] text-[#F9F1DF]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Section Header */}
         <div className="text-center max-w-3xl mx-auto mb-10">
-          <div className="inline-flex items-center gap-1.5 text-xs uppercase font-mono font-bold tracking-widest text-[#C28236] mb-2 px-3 py-1 bg-[#EDE5D5] rounded-full">
+            <div className="inline-flex items-center gap-1.5 text-xs uppercase font-mono font-bold tracking-widest text-[#173F35] mb-2 px-3 py-1 bg-[#E8A83E] rounded-full">
             <Layers className="w-3.5 h-3.5" /> 100% Certified Biodegradable Tableware
           </div>
-          <h2 className="text-3xl sm:text-4xl font-serif font-bold text-[#2D2A26]">
-            Biodegradable Plates & Bulk Pack Sizes
+          <h2 className="text-5xl sm:text-7xl font-serif font-bold text-[#F9F1DF] leading-[.9]">
+            CHOOSE YOUR STACK
           </h2>
-          <p className="text-[#6B5E4F] text-sm sm:text-base mt-2">
+          <p className="text-[#D8E0D2] text-sm sm:text-base mt-3">
             Engineered from natural upcycled plant fibers in Central India. Grease-proof, oven-safe to 180°C, and completely compostable in soil in 30 days.
           </p>
         </div>
@@ -76,16 +76,16 @@ export const ProductCatalog: React.FC<ProductCatalogProps> = ({
         )}
 
         {/* Hero Product Spotlight Card */}
-        <div className="bg-white rounded-3xl border border-[#E6DEC8] shadow-xl overflow-hidden mb-12">
+        <div className="bg-[#F9F1DF] rounded-[2rem] border-4 border-[#E8A83E] shadow-[12px_12px_0_#E8A83E] overflow-hidden mb-12">
           <div className="grid grid-cols-1 lg:grid-cols-12">
             
             {/* Left: Plate Photo Display */}
-            <div className="lg:col-span-6 p-8 sm:p-12 bg-white flex flex-col items-center justify-center relative border-b lg:border-b-0 lg:border-r border-[#E6DEC8]">
+            <div className="lg:col-span-6 p-8 sm:p-12 bg-[#E8A83E] flex flex-col items-center justify-center relative border-b lg:border-b-0 lg:border-r-4 border-[#173F35]">
               <div className="relative w-full max-w-md aspect-square flex items-center justify-center p-4">
                 <img
                   src={currentProduct.image}
                   alt={currentProduct.name}
-                  className="w-full h-full object-contain drop-shadow-2xl hover:scale-105 transition-transform duration-500 cursor-pointer"
+                  className="w-full h-full object-contain drop-shadow-2xl hover:scale-105 transition-transform duration-500 cursor-pointer mix-blend-multiply"
                   onClick={() => onSelectProduct(currentProduct)}
                   referrerPolicy="no-referrer"
                 />
@@ -111,7 +111,7 @@ export const ProductCatalog: React.FC<ProductCatalogProps> = ({
             </div>
 
             {/* Right: Plate Details & Pack Options */}
-            <div className="lg:col-span-6 p-6 sm:p-10 flex flex-col justify-between space-y-6">
+            <div className="lg:col-span-6 p-6 sm:p-10 flex flex-col justify-between space-y-6 text-[#173F35]">
               <div>
                 <div className="flex items-center justify-between text-xs mb-2">
                   <div className="flex items-center text-[#C28236] font-semibold">
@@ -124,7 +124,7 @@ export const ProductCatalog: React.FC<ProductCatalogProps> = ({
                   </span>
                 </div>
 
-                <h3 className="text-2xl sm:text-3xl font-serif font-bold text-[#2D2A26] leading-tight">
+                <h3 className="text-4xl sm:text-6xl font-serif font-bold text-[#173F35] leading-[.9]">
                   {currentProduct.name}
                 </h3>
 

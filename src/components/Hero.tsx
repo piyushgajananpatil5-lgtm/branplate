@@ -31,11 +31,10 @@ export const Hero: React.FC<HeroProps> = ({
   const handleAdvisor = onAdvisorClick || (() => {});
   const handleSample = onSampleClick || onOpenSampleModal || (() => {});
   return (
-    <section id="hero-section" className="relative overflow-hidden bg-[#FAF8F5] pt-12 pb-20 border-b border-[#E6DEC8]">
+    <section id="hero-section" className="relative overflow-hidden bg-[#E8A83E] pt-10 pb-20 border-b-4 border-[#173F35]">
       {/* Subtle organic background patterns */}
-      <div className="absolute inset-0 pointer-events-none opacity-40">
-        <div className="absolute -top-24 -right-24 w-96 h-96 rounded-full bg-[#EADCC8] blur-3xl"></div>
-        <div className="absolute bottom-0 left-10 w-80 h-80 rounded-full bg-[#F3E7D3] blur-2xl"></div>
+      <div className="absolute inset-0 pointer-events-none opacity-20">
+        <div className="absolute inset-0 bg-[radial-gradient(#173F35_1px,transparent_1px)] [background-size:18px_18px]"></div>
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
@@ -48,22 +47,23 @@ export const Hero: React.FC<HeroProps> = ({
             <div id="hero-eyebrow-badge" className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#EDE5D5] border border-[#D5C6AC] text-[#5A4F3D] text-xs sm:text-sm font-medium tracking-wide">
               <span className="w-2 h-2 rounded-full bg-[#10B981]"></span>
               <span className="font-semibold uppercase tracking-wider text-[11px] sm:text-xs">
-                CENTRAL INDIA · CIRCULAR ECONOMY · ZERO LANDFILL
+                FIELD-FORGED TABLEWARE · ZERO PLASTIC
               </span>
             </div>
 
             {/* Main Headline matching screenshot */}
-            <h1 id="hero-main-title" className="text-4xl sm:text-5xl lg:text-6xl font-serif font-bold text-[#2D2A26] leading-[1.12] tracking-tight">
-              From Field to Feast.<br />
-              <span className="text-[#C28236]">Back to Earth.</span>
+            <h1 id="hero-main-title" className="text-6xl sm:text-8xl lg:text-[9rem] font-serif font-bold text-[#173F35] leading-[.82]">
+              PLATES<br />
+              <span className="text-[#F9F1DF]">WITH A</span><br />
+              PURPOSE.
             </h1>
 
             {/* Biodegradable Tagline matching screenshot */}
-            <p id="hero-tagline-text" className="text-xl sm:text-2xl font-serif italic text-[#6B5E4F] font-medium">
-              Biodegradable.
+            <p id="hero-tagline-text" className="text-xl sm:text-2xl font-serif text-[#173F35] font-medium uppercase">
+              The good kind of disposable.
             </p>
 
-            <p className="text-base sm:text-lg text-[#5A5043] leading-relaxed max-w-2xl">
+            <p className="text-base sm:text-lg text-[#173F35] leading-relaxed max-w-xl font-medium">
               100% natural, leak-resistant biodegradable plates forged from upcycled wheat bran agricultural surplus in Central India. Oven, microwave, and hot-liquid safe — completely decomposing in soil in 30 days without toxic microplastics.
             </p>
 
@@ -72,7 +72,7 @@ export const Hero: React.FC<HeroProps> = ({
               <button
                 id="hero-shop-now-btn"
                 onClick={handleShop}
-                className="px-8 py-4 rounded-full bg-[#2D2A26] text-[#F9F6F0] font-semibold text-base hover:bg-black transition-all shadow-lg hover:shadow-xl flex items-center gap-2.5 group"
+                className="px-8 py-4 rounded-full bg-[#173F35] text-[#F9F1DF] font-semibold text-base hover:bg-[#0c2d26] transition-all shadow-lg hover:shadow-xl flex items-center gap-2.5 group"
               >
                 <span>Shop Plates</span>
                 <ArrowRight className="w-4 h-4 text-[#E8C58C] group-hover:translate-x-1 transition-transform" />
@@ -81,7 +81,7 @@ export const Hero: React.FC<HeroProps> = ({
               <button
                 id="hero-ai-advisor-btn"
                 onClick={handleAdvisor}
-                className="px-6 py-4 rounded-full bg-[#EDE5D5] text-[#2D2A26] font-semibold text-base hover:bg-[#E3D7C1] border border-[#D5C6AC] transition-all flex items-center gap-2"
+                className="px-6 py-4 rounded-full bg-[#F9F1DF] text-[#173F35] font-semibold text-base hover:bg-white border border-[#173F35] transition-all flex items-center gap-2"
               >
                 <Sparkles className="w-4 h-4 text-[#C28236]" />
                 <span>AI Plates Event Planner</span>
@@ -89,7 +89,7 @@ export const Hero: React.FC<HeroProps> = ({
             </div>
 
             {/* Key Quality Assurances */}
-            <div className="pt-6 border-t border-[#E6DEC8] grid grid-cols-2 sm:grid-cols-3 gap-3 text-xs sm:text-sm text-[#4A4031]">
+            <div className="pt-6 border-t border-[#173F35]/30 grid grid-cols-2 sm:grid-cols-3 gap-3 text-xs sm:text-sm text-[#173F35]">
               <div className="flex items-center gap-2">
                 <CheckCircle2 className="w-4 h-4 text-[#10B981] shrink-0" />
                 <span className="font-medium">Composts in 30 Days</span>
@@ -108,11 +108,11 @@ export const Hero: React.FC<HeroProps> = ({
 
           {/* Right Column: Hero Visual & Live Impact Summary */}
           <div className="lg:col-span-5 relative">
-            <div className="relative rounded-2xl overflow-hidden shadow-2xl border-4 border-[#FAF8F5] bg-[#FFFFFF] aspect-[4/3] sm:aspect-square flex items-center justify-center p-6 sm:p-10">
+            <div className="plate-packaging product-rise relative rounded-[2rem] overflow-hidden border-4 border-[#173F35] aspect-[4/3] sm:aspect-square flex items-center justify-center p-6 sm:p-10">
               <img
                 src="/plate.svg"
                 alt="BranPlate 100% Biodegradable Plate"
-                className="w-full h-full object-contain drop-shadow-xl"
+                className="w-full h-full object-contain drop-shadow-xl mix-blend-multiply"
                 referrerPolicy="no-referrer"
               />
               
