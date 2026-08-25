@@ -1,0 +1,29 @@
+services:
+  - type: web
+    name: branplate-service
+    env: node
+    plan: starter
+    region: singapore
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: "3000"
+      - key: CLIENT_URL
+        value: https://branplate-q6sx.vercel.app
+      - key: CUSTOM_DOMAIN
+        value: thelegend5.com
+      - key: FIRST_ADMIN_EMAIL
+        value: piyushgajananpatil5@gmail.com
+      - key: MONGO_URI
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: ADMIN_BOOTSTRAP_PASSWORD
+        sync: false
+      - key: CUSTOMER_BOOTSTRAP_PASSWORD
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
