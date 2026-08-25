@@ -76,7 +76,20 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
       return;
     }
     const reader = new FileReader();
-    reader.onload = () => resolve(String(reader.result));
+    reader.onload = () => {
+      const source = new Image();
+      source.onload = () => {
+        const maxDimension = 1400;
+        const scale = Math.min(1, maxDimension / Math.max(source.width, source.height));
+        const canvas = document.createElement('canvas');
+        canvas.width = Math.max(1, Math.round(source.width * scale));
+        canvas.height = Math.max(1, Math.round(source.height * scale));
+        canvas.getContext('2d')?.drawImage(source, 0, 0, canvas.width, canvas.height);
+        resolve(canvas.toDataURL('image/jpeg', 0.82));
+      };
+      source.onerror = () => reject(new Error('Could not process the selected image.'));
+      source.src = String(reader.result);
+    };
     reader.onerror = () => reject(new Error('Could not read the selected image.'));
     reader.readAsDataURL(file);
   });
