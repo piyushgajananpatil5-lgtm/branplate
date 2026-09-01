@@ -26,8 +26,9 @@ const INITIAL_PRODUCTS = [
     stockCount: 25e3,
     featured: true,
     bestseller: true,
-    image: "/plate.svg",
+    image: "/plate.webp",
     secondaryImages: [
+      "/plate.webp",
       "/plate.svg"
     ],
     packSizes: [

@@ -1,5 +1,5 @@
 import { jsx, jsxs } from "react/jsx-runtime";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { Navbar } from "./components/Navbar";
 import { Hero } from "./components/Hero";
 import { ProductCatalog } from "./components/ProductCatalog";
@@ -48,13 +48,13 @@ function App() {
     gstinNumber: "27AAECB8821P1Z5"
   });
   const [impactStats, setImpactStats] = useState(SUSTAINABILITY_METRICS);
-  const fetchProducts = () => {
+  const fetchProducts = useCallback(() => {
     apiFetch("/api/products").then((res) => res.json()).then((data) => {
       if (data.success && Array.isArray(data.products) && data.products.length > 0) setProducts(data.products);
     }).catch(() => {
     });
-  };
-  const restoreSession = async () => {
+  }, []);
+  const restoreSession = useCallback(async () => {
     try {
       const token = localStorage.getItem("branplate_token");
       if (!token) return;
@@ -70,7 +70,7 @@ function App() {
     } catch {
       clearSession();
     }
-  };
+  }, []);
   useEffect(() => {
     apiFetch("/api/config").then((res) => res.json()).then((data) => {
       if (data.success && data.config) setConfig((prev) => ({ ...prev, ...data.config }));
@@ -83,7 +83,7 @@ function App() {
     fetchProducts();
     restoreSession();
   }, []);
-  const handleAddToCart = (product, packSizeIndex) => {
+  const handleAddToCart = useCallback((product, packSizeIndex) => {
     setCartItems((prev) => {
       const existingIndex = prev.findIndex(
         (item) => item.product.id === product.id && item.packSizeIndex === packSizeIndex
@@ -96,8 +96,8 @@ function App() {
       return [...prev, { product, packSizeIndex, quantity: 1 }];
     });
     setIsCartOpen(true);
-  };
-  const handleAddBundleToCart = (bundleItems) => {
+  }, []);
+  const handleAddBundleToCart = useCallback((bundleItems) => {
     setCartItems((prev) => {
       const updated = [...prev];
       bundleItems.forEach(({ product, packIndex, quantity }) => {
@@ -113,8 +113,11 @@ function App() {
       return updated;
     });
     setIsCartOpen(true);
-  };
-  const handleUpdateQuantity = (index, newQuantity) => {
+  }, []);
+  const handleRemoveCartItem = useCallback((index) => {
+    setCartItems((prev) => prev.filter((_, i) => i !== index));
+  }, []);
+  const handleUpdateQuantity = useCallback((index, newQuantity) => {
     if (newQuantity <= 0) {
       handleRemoveCartItem(index);
     } else {
@@ -124,24 +127,21 @@ function App() {
         return updated;
       });
     }
-  };
-  const handleRemoveCartItem = (index) => {
-    setCartItems((prev) => prev.filter((_, i) => i !== index));
-  };
-  const handleProceedToCheckout = (appliedDiscount, promo) => {
+  }, [handleRemoveCartItem]);
+  const handleProceedToCheckout = useCallback((appliedDiscount, promo) => {
     setCheckoutDiscount(appliedDiscount);
     setCheckoutPromo(promo);
     setIsCartOpen(false);
     setIsCheckoutOpen(true);
-  };
-  const handleOrderSuccess = (_order) => {
+  }, []);
+  const handleOrderSuccess = useCallback((_order) => {
     setCartItems([]);
     apiFetch("/api/impact").then((res) => res.json()).then((data) => {
       if (data.success && data.impact) setImpactStats(data.impact);
     }).catch(() => {
     });
-  };
-  const scrollToSection = (sectionId) => {
+  }, []);
+  const scrollToSection = useCallback((sectionId) => {
     setActiveSection(sectionId);
     if (sectionId === "home") {
       window.scrollTo({ top: 0, behavior: "smooth" });
@@ -151,7 +151,12 @@ function App() {
     if (elem) {
       elem.scrollIntoView({ behavior: "smooth" });
     }
-  };
+  }, []);
+  const footerActions = useMemo(() => ({
+    onNavigate: scrollToSection,
+    onOpenSampleModal: () => setIsSampleModalOpen(true),
+    onOpenAdmin: () => setIsAdminOpen(true)
+  }), [scrollToSection]);
   return /* @__PURE__ */ jsxs("div", { className: "min-h-screen bg-[#FAF8F5] text-[#2D2A26] flex flex-col font-sans selection:bg-[#E8C58C] selection:text-[#1C1A17]", children: [
     /* @__PURE__ */ jsx(
       Navbar,
@@ -219,9 +224,7 @@ function App() {
       Footer,
       {
         config,
-        onNavigate: scrollToSection,
-        onOpenSampleModal: () => setIsSampleModalOpen(true),
-        onOpenAdmin: () => setIsAdminOpen(true)
+        ...footerActions
       }
     ),
     /* @__PURE__ */ jsx(

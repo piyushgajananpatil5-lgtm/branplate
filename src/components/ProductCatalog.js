@@ -1,6 +1,15 @@
 import { Fragment, jsx, jsxs } from "react/jsx-runtime";
-import { useState } from "react";
+import { memo, useEffect, useMemo, useState } from "react";
 import { ShoppingBag, Star, Eye, Check, ShieldCheck, Flame, Layers, Sprout, CheckCircle2, PackageCheck } from "lucide-react";
+const buildResponsiveImage = (src) => {
+  if (!src) return { webp: src, fallback: src };
+  if (src.endsWith(".webp")) return { webp: src, fallback: src };
+  const withoutExtension = src.replace(/\.[^/.]+$/, "");
+  return {
+    webp: `${withoutExtension}.webp`,
+    fallback: src
+  };
+};
 const ProductCatalog = ({
   products,
   onAddToCart,
@@ -9,7 +18,23 @@ const ProductCatalog = ({
   const [activeProductId, setActiveProductId] = useState(products[0]?.id || "bp-plate-100bio");
   const [selectedPackIndex, setSelectedPackIndex] = useState({});
   const [addedAnimation, setAddedAnimation] = useState({});
-  const currentProduct = products.find((p) => p.id === activeProductId) || products[0];
+  useEffect(() => {
+    if (!products.some((p) => p.id === activeProductId)) {
+      setActiveProductId(products[0]?.id || "bp-plate-100bio");
+    }
+  }, [products, activeProductId]);
+  useEffect(() => {
+    setAddedAnimation((prev) => {
+      const next = {};
+      Object.entries(prev).forEach(([key, value]) => {
+        if (!key.startsWith(`${activeProductId}-`)) {
+          next[key] = value;
+        }
+      });
+      return next;
+    });
+  }, [activeProductId]);
+  const currentProduct = useMemo(() => products.find((p) => p.id === activeProductId) || products[0], [products, activeProductId]);
   const handlePackChange = (productId, packIndex) => {
     setSelectedPackIndex((prev) => ({ ...prev, [productId]: packIndex }));
   };
@@ -24,6 +49,7 @@ const ProductCatalog = ({
   if (!currentProduct) return null;
   const currentPackIndex = selectedPackIndex[currentProduct.id] || 0;
   const currentPack = currentProduct.packSizes[currentPackIndex] || currentProduct.packSizes[0] || { price: currentProduct.price, label: "Standard Pack", size: 25, unitPrice: currentProduct.price / 25 };
+  const currentImageSources = buildResponsiveImage(currentProduct.image);
   return /* @__PURE__ */ jsx("section", { id: "shop-section", className: "py-20 bg-[#173F35] text-[#F9F1DF]", children: /* @__PURE__ */ jsxs("div", { className: "max-w-7xl mx-auto px-4 sm:px-6 lg:px-8", children: [
     /* @__PURE__ */ jsxs("div", { className: "text-center max-w-3xl mx-auto mb-10", children: [
       /* @__PURE__ */ jsxs("div", { className: "inline-flex items-center gap-1.5 text-xs uppercase font-mono font-bold tracking-widest text-[#173F35] mb-2 px-3 py-1 bg-[#E8A83E] rounded-full", children: [
@@ -51,14 +77,24 @@ const ProductCatalog = ({
     )) }),
     /* @__PURE__ */ jsx("div", { className: "bg-[#F9F1DF] rounded-[2rem] border-4 border-[#E8A83E] shadow-[12px_12px_0_#E8A83E] overflow-hidden mb-12", children: /* @__PURE__ */ jsxs("div", { className: "grid grid-cols-1 lg:grid-cols-12", children: [
       /* @__PURE__ */ jsxs("div", { className: "lg:col-span-6 p-8 sm:p-12 bg-[#E8A83E] flex flex-col items-center justify-center relative border-b lg:border-b-0 lg:border-r-4 border-[#173F35]", children: [
-        /* @__PURE__ */ jsx("div", { className: "relative w-full max-w-md aspect-square flex items-center justify-center p-4", children: /* @__PURE__ */ jsx(
-          "img",
+        /* @__PURE__ */ jsx("div", { className: "relative w-full max-w-md aspect-square flex items-center justify-center p-4", children: /* @__PURE__ */ jsxs(
+          "picture",
           {
-            src: currentProduct.image,
-            alt: currentProduct.name,
-            className: "w-full h-full object-contain drop-shadow-2xl hover:scale-105 transition-transform duration-500 cursor-pointer mix-blend-multiply",
-            onClick: () => onSelectProduct(currentProduct),
-            referrerPolicy: "no-referrer"
+            children: [
+              /* @__PURE__ */ jsx("source", { srcSet: currentImageSources.webp, type: "image/webp" }),
+              /* @__PURE__ */ jsx("img", {
+                src: currentImageSources.fallback,
+                alt: currentProduct.name,
+                className: "w-full h-full object-contain drop-shadow-2xl hover:scale-105 transition-transform duration-500 cursor-pointer mix-blend-multiply",
+                onClick: () => onSelectProduct(currentProduct),
+                referrerPolicy: "no-referrer",
+                loading: "lazy",
+                decoding: "async",
+                fetchPriority: "low",
+                width: 800,
+                height: 800
+              })
+            ]
           }
         ) }),
         /* @__PURE__ */ jsxs("div", { className: "absolute top-6 left-6 flex flex-wrap gap-2", children: [
@@ -231,6 +267,7 @@ const ProductCatalog = ({
     ] })
   ] }) });
 };
+const ProductCatalogMemo = memo(ProductCatalog);
 export {
-  ProductCatalog
+  ProductCatalogMemo as ProductCatalog
 };

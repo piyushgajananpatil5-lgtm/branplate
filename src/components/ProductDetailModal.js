@@ -17,6 +17,15 @@ const ProductDetailModal = ({
     setTimeout(() => setIsAdded(false), 1500);
   };
   const images = [product.image, ...product.secondaryImages];
+  const getResponsiveSources = (src) => {
+    if (!src) return { webp: src, fallback: src };
+    if (src.endsWith(".webp")) return { webp: src, fallback: src };
+    const withoutExtension = src.replace(/\.[^/.]+$/, "");
+    return {
+      webp: `${withoutExtension}.webp`,
+      fallback: src
+    };
+  };
   return /* @__PURE__ */ jsx("div", { id: "product-detail-backdrop", className: "fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto", children: /* @__PURE__ */ jsxs(
     "div",
     {
@@ -35,26 +44,39 @@ const ProductDetailModal = ({
         /* @__PURE__ */ jsxs("div", { className: "grid grid-cols-1 md:grid-cols-12 gap-8 p-6 sm:p-8", children: [
           /* @__PURE__ */ jsxs("div", { className: "md:col-span-6 space-y-4", children: [
             /* @__PURE__ */ jsxs("div", { className: "aspect-[4/3] rounded-2xl overflow-hidden bg-white border border-[#E6DEC8] shadow-inner relative flex items-center justify-center p-6", children: [
-              /* @__PURE__ */ jsx(
-                "img",
-                {
-                  src: selectedImage,
-                  alt: product.name,
-                  className: "w-full h-full object-contain drop-shadow-lg",
-                  referrerPolicy: "no-referrer"
-                }
-              ),
+              (() => {
+                const sources = getResponsiveSources(selectedImage);
+                return /* @__PURE__ */ jsxs("picture", { children: [
+                  /* @__PURE__ */ jsx("source", { srcSet: sources.webp, type: "image/webp" }),
+                  /* @__PURE__ */ jsx("img", {
+                    src: sources.fallback,
+                    alt: product.name,
+                    className: "w-full h-full object-contain drop-shadow-lg",
+                    referrerPolicy: "no-referrer",
+                    loading: "lazy",
+                    decoding: "async",
+                    width: 800,
+                    height: 600
+                  })
+                ] });
+              })(),
               /* @__PURE__ */ jsx("div", { className: "absolute bottom-3 left-3 bg-[#2D2A26]/80 text-[#E8C58C] text-xs font-mono px-3 py-1 rounded-md backdrop-blur-sm", children: product.diameterOrSize })
             ] }),
-            images.length > 1 && /* @__PURE__ */ jsx("div", { className: "flex gap-3 overflow-x-auto pb-1", children: images.map((img, i) => /* @__PURE__ */ jsx(
-              "button",
-              {
-                onClick: () => setSelectedImage(img),
-                className: `w-20 h-16 rounded-xl overflow-hidden border-2 transition-all ${selectedImage === img ? "border-[#C28236] scale-105 shadow-md" : "border-[#E6DEC8] opacity-70 hover:opacity-100"}`,
-                children: /* @__PURE__ */ jsx("img", { src: img, alt: "Thumbnail", className: "w-full h-full object-cover", referrerPolicy: "no-referrer" })
-              },
-              i
-            )) }),
+            images.length > 1 && /* @__PURE__ */ jsx("div", { className: "flex gap-3 overflow-x-auto pb-1", children: images.map((img, i) => {
+              const sources = getResponsiveSources(img);
+              return /* @__PURE__ */ jsx(
+                "button",
+                {
+                  onClick: () => setSelectedImage(img),
+                  className: `w-20 h-16 rounded-xl overflow-hidden border-2 transition-all ${selectedImage === img ? "border-[#C28236] scale-105 shadow-md" : "border-[#E6DEC8] opacity-70 hover:opacity-100"}`,
+                  children: /* @__PURE__ */ jsxs("picture", { children: [
+                    /* @__PURE__ */ jsx("source", { srcSet: sources.webp, type: "image/webp" }),
+                    /* @__PURE__ */ jsx("img", { src: sources.fallback, alt: "Thumbnail", className: "w-full h-full object-cover", referrerPolicy: "no-referrer", loading: "lazy", decoding: "async", width: 120, height: 120 })
+                  ] })
+                },
+                i
+              );
+            }) }),
             /* @__PURE__ */ jsxs("div", { className: "p-4 rounded-2xl bg-[#EDE5D5] border border-[#D5C6AC] text-xs space-y-2 text-[#4A4031]", children: [
               /* @__PURE__ */ jsxs("div", { className: "font-bold flex items-center gap-1.5 text-[#2D2A26]", children: [
                 /* @__PURE__ */ jsx(Sprout, { className: "w-4 h-4 text-[#10B981]" }),
