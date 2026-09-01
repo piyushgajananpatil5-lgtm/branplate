@@ -395,6 +395,23 @@ const AdminPortal = ({
       console.error("Error updating order:", err);
     }
   };
+  const handleDeleteOrder = async (orderId) => {
+    if (!confirm("Are you sure you want to delete this order? This action cannot be undone.")) return;
+    try {
+      const res = await apiFetch(`/api/orders/${orderId}`, { method: "DELETE" });
+      const data = await res.json();
+      if (data.success) {
+        setOrders((prev) => prev.filter((order) => order.id !== orderId));
+        setProductActionStatus("Order deleted successfully.");
+        setTimeout(() => setProductActionStatus(null), 3000);
+      } else {
+        setProductActionError(data.message || "Failed to delete order.");
+      }
+    } catch (err) {
+      console.error("Error deleting order:", err);
+      setProductActionError("Unable to delete the order right now.");
+    }
+  };
   const handleUpdateInquiryStatus = async (inqId, newStatus) => {
     try {
       const res = await apiFetch(`/api/inquiries/${inqId}/status`, {
@@ -1098,6 +1115,15 @@ const AdminPortal = ({
                         /* @__PURE__ */ jsx("option", { value: "shipped", children: "Shipped" }),
                         /* @__PURE__ */ jsx("option", { value: "delivered", children: "Delivered" })
                       ]
+                    }
+                  ),
+                  /* @__PURE__ */ jsx(
+                    "button",
+                    {
+                      onClick: () => handleDeleteOrder(ord.id),
+                      className: "p-2 rounded-xl bg-red-950/30 border border-red-900/40 text-red-300 hover:bg-red-900 hover:text-white transition-colors",
+                      title: "Delete order",
+                      children: /* @__PURE__ */ jsx(Trash2, { className: "w-4 h-4" })
                     }
                   ),
                   /* @__PURE__ */ jsxs("span", { className: "font-mono font-bold text-sm text-white", children: [
