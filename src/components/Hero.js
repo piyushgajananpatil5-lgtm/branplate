@@ -86,7 +86,7 @@ const Hero = ({
             {
               src: "/plate.svg",
               alt: "BranPlate 100% Biodegradable Plate",
-              className: "w-full h-full object-contain drop-shadow-xl mix-blend-multiply",
+              className: "w-full h-full object-contain mix-blend-multiply",
               referrerPolicy: "no-referrer"
             }
           ),

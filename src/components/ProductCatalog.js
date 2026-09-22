@@ -42,9 +42,6 @@ const ProductCatalog = ({
     const packIndex = pIndex !== void 0 ? pIndex : selectedPackIndex[prod.id] || 0;
     onAddToCart(prod, packIndex);
     setAddedAnimation((prev) => ({ ...prev, [`${prod.id}-${packIndex}`]: true }));
-    setTimeout(() => {
-      setAddedAnimation((prev) => ({ ...prev, [`${prod.id}-${packIndex}`]: false }));
-    }, 1200);
   };
   if (!currentProduct) return null;
   const currentPackIndex = selectedPackIndex[currentProduct.id] || 0;
@@ -85,12 +82,12 @@ const ProductCatalog = ({
               /* @__PURE__ */ jsx("img", {
                 src: currentImageSources.fallback,
                 alt: currentProduct.name,
-                className: "w-full h-full object-contain drop-shadow-2xl hover:scale-105 transition-transform duration-500 cursor-pointer mix-blend-multiply",
+                className: "w-full h-full object-contain drop-shadow-2xl hover:scale-105 cursor-pointer mix-blend-multiply",
                 onClick: () => onSelectProduct(currentProduct),
                 referrerPolicy: "no-referrer",
-                loading: "lazy",
+                loading: "eager",
                 decoding: "async",
-                fetchPriority: "low",
+                fetchPriority: "high",
                 width: 800,
                 height: 800
               })

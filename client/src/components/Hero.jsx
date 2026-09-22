@@ -25,7 +25,7 @@ export default function Hero() {
       <motion.h1
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.7 }}
+        transition={{ duration: 0 }}
         className="text-5xl md:text-7xl font-display font-bold text-bran-brown leading-tight"
       >
         From Field to Feast.
@@ -40,7 +40,7 @@ export default function Hero() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            transition={{ duration: 0.4 }}
+            transition={{ duration: 0 }}
             className="text-2xl text-bran-brown/70 font-medium"
           >
             {words[index]}
@@ -51,7 +51,7 @@ export default function Hero() {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.3, duration: 0.6 }}
+        transition={{ delay: 0, duration: 0 }}
       >
         <Link to="/shop">
           <motion.button
