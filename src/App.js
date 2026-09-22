@@ -1,5 +1,6 @@
 import { jsx, jsxs } from "react/jsx-runtime";
 import { useState, useEffect, useCallback, useMemo } from "react";
+import { MessageCircle } from "lucide-react";
 import { Navbar } from "./components/Navbar";
 import { Hero } from "./components/Hero";
 import { ProductCatalog } from "./components/ProductCatalog";
@@ -36,7 +37,7 @@ function App() {
   const [authUser, setAuthUser] = useState(null);
   const [config, setConfig] = useState({
     clientUrl: "https://branplate-q6sx.vercel.app",
-    customDomain: "thelegend5.com",
+    customDomain: "",
     firstAdminEmail: "piyushgajananpatil5@gmail.com",
     mongoUri: "",
     brandName: "BranPlate",
@@ -227,6 +228,17 @@ function App() {
         ...footerActions
       }
     ),
+    /* @__PURE__ */ jsxs("a", {
+      href: "https://wa.me/919039220991?text=Hello%20BranEco%2C%20I%27d%20like%20to%20know%20more%20about%20your%20products.",
+      target: "_blank",
+      rel: "noreferrer",
+      "aria-label": "Chat with BranEco on WhatsApp",
+      className: "fixed bottom-5 right-5 z-50 inline-flex items-center gap-2 rounded-full bg-[#188B45] px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-[#188B45]/25 transition hover:-translate-y-1 hover:bg-[#116C35]",
+      children: [
+        /* @__PURE__ */ jsx(MessageCircle, { className: "w-5 h-5", "aria-hidden": "true" }),
+        /* @__PURE__ */ jsx("span", { children: "WhatsApp us" })
+      ]
+    }),
     /* @__PURE__ */ jsx(
       ProductDetailModal,
       {

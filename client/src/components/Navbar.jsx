@@ -6,7 +6,8 @@ import { useAuth } from '../context/AuthContext';
 const links = [
   { to: '/shop', label: 'Shop' },
   { to: '/about', label: 'About' },
-  { to: '/contact', label: 'Contact' },
+  { to: '/sustainability', label: 'Impact' },
+  { to: '/quote', label: 'Get a quote' },
 ];
 
 export default function Navbar() {
@@ -17,7 +18,7 @@ export default function Navbar() {
     <nav className="sticky top-0 z-40 bg-cream/80 backdrop-blur-md border-b border-bran-brown/10">
       <div className="max-w-7xl mx-auto flex items-center justify-between px-6 py-4">
         <Link to="/" className="text-2xl font-display font-bold text-bran-brown">
-          BranPlate
+          BranEco
         </Link>
 
         <div className="hidden md:flex gap-8">

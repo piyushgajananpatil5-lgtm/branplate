@@ -30,6 +30,16 @@ export default function Home() {
 
       <BundleSection products={products} />
       <ReviewsMarquee />
+      <section className="mx-auto max-w-7xl px-6 pb-16 md:px-12">
+        <div className="grid gap-5 md:grid-cols-3">
+          {['Clear, upfront pricing', 'Designed for Indian events', 'Useful after the meal'].map((title) => (
+            <div key={title} className="border-l-2 border-wheat-gold pl-5">
+              <h3 className="font-semibold text-bran-brown">{title}</h3>
+              <p className="mt-2 text-sm leading-6 text-bran-brown/60">Thoughtful materials, dependable service, and no hidden fees.</p>
+            </div>
+          ))}
+        </div>
+      </section>
     </div>
   );
 }

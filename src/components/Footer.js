@@ -20,7 +20,7 @@ const Footer = ({
         /* @__PURE__ */ jsxs("div", { className: "pt-2 flex flex-wrap items-center gap-2", children: [
           /* @__PURE__ */ jsxs("div", { className: "inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#141210] border border-[#3A352F] text-xs font-mono text-[#E8C58C]", children: [
             /* @__PURE__ */ jsx(Globe, { className: "w-3.5 h-3.5 text-[#10B981]" }),
-            /* @__PURE__ */ jsx("span", { children: config.customDomain })
+            /* @__PURE__ */ jsx("span", { children: config.customDomain || "Domain pending" })
           ] }),
           /* @__PURE__ */ jsxs("div", { className: "inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#141210] border border-[#3A352F] text-xs font-mono text-neutral-300", children: [
             /* @__PURE__ */ jsx(ShieldCheck, { className: "w-3.5 h-3.5 text-[#10B981]" }),

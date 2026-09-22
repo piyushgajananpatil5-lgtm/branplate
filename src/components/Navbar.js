@@ -42,8 +42,8 @@ const Navbar = ({
             onClick: () => setDomainTooltip(!domainTooltip),
             children: [
               /* @__PURE__ */ jsx(Globe, { className: "w-3 h-3 text-[#10B981]" }),
-              /* @__PURE__ */ jsx("span", { className: "font-mono font-semibold", children: config.customDomain || "thelegend5.com" }),
-              /* @__PURE__ */ jsx("span", { className: "text-[9px] bg-[#10B981]/20 text-[#10B981] px-1 rounded", children: "LIVE" }),
+              /* @__PURE__ */ jsx("span", { className: "font-mono font-semibold", children: config.customDomain || "Domain pending" }),
+              /* @__PURE__ */ jsx("span", { className: "text-[9px] bg-[#E8C58C]/20 text-[#E8C58C] px-1 rounded", children: config.customDomain ? "LIVE" : "SETUP" }),
               domainTooltip && /* @__PURE__ */ jsxs("div", { className: "absolute right-0 top-full mt-2 w-72 p-3 bg-[#1C1A17] text-white rounded-lg shadow-xl border border-[#443E38] z-50 text-left", children: [
                 /* @__PURE__ */ jsxs("div", { className: "font-semibold text-xs text-[#E8C58C] mb-1 flex items-center gap-1", children: [
                   /* @__PURE__ */ jsx(ShieldCheck, { className: "w-3.5 h-3.5 text-[#10B981]" }),

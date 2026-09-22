@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { lazy, Suspense } from 'react';
 import { CartProvider } from './context/CartContext';
 import { AuthProvider } from './context/AuthContext';
 import { AdminAuthProvider } from './context/AdminAuthContext';
@@ -28,6 +29,10 @@ import AdminOrders from './pages/admin/AdminOrders';
 import AdminProducts from './pages/admin/AdminProducts';
 import AdminQueries from './pages/admin/AdminQueries';
 import AdminSettings from './pages/admin/AdminSettings';
+import WhatsAppButton from './components/WhatsAppButton';
+
+const Sustainability = lazy(() => import('./pages/Sustainability'));
+const Quote = lazy(() => import('./pages/Quote'));
 
 function StorefrontLayout({ children }) {
   return (
@@ -35,6 +40,7 @@ function StorefrontLayout({ children }) {
       <Navbar />
       <CartDrawer />
       {children}
+      <WhatsAppButton />
       <Footer />
     </>
   );
@@ -46,7 +52,8 @@ export default function App() {
       <AdminAuthProvider>
         <CartProvider>
           <BrowserRouter>
-            <Routes>
+            <Suspense fallback={<div className="min-h-[50vh] grid place-items-center text-bran-brown/60">Loading…</div>}>
+              <Routes>
               {/* Admin routes — no storefront navbar/footer */}
               <Route path="/admin/login" element={<AdminLogin />} />
               <Route path="/login/admin/server.js" element={<AdminLogin />} />
@@ -86,7 +93,10 @@ export default function App() {
               />
               <Route path="/contact" element={<StorefrontLayout><Contact /></StorefrontLayout>} />
               <Route path="/about" element={<StorefrontLayout><About /></StorefrontLayout>} />
-            </Routes>
+              <Route path="/sustainability" element={<StorefrontLayout><Sustainability /></StorefrontLayout>} />
+              <Route path="/quote" element={<StorefrontLayout><Quote /></StorefrontLayout>} />
+              </Routes>
+            </Suspense>
           </BrowserRouter>
         </CartProvider>
       </AdminAuthProvider>

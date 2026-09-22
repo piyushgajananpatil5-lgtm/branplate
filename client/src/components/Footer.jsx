@@ -16,8 +16,8 @@ export default function Footer() {
     <footer className="bg-bran-brown text-cream mt-20">
       <div className="max-w-7xl mx-auto px-6 py-14 grid md:grid-cols-3 gap-10">
         <div>
-          <h3 className="text-2xl font-display font-bold mb-3">BranPlate</h3>
-          <p className="text-cream/70 text-sm">From Field to Feast. Back to Earth.</p>
+          <h3 className="text-2xl font-display font-bold mb-3">BranEco</h3>
+          <p className="text-cream/70 text-sm">From field to feast, back to earth.</p>
           <div className="flex gap-4 mt-4">
             <Instagram size={20} className="hover:text-wheat-gold cursor-pointer transition-colors" />
             <Facebook size={20} className="hover:text-wheat-gold cursor-pointer transition-colors" />
@@ -30,6 +30,8 @@ export default function Footer() {
             {[
               ['/shop', 'Shop'],
               ['/about', 'About'],
+              ['/sustainability', 'Sustainability'],
+              ['/quote', 'Get a quote'],
               ['/contact', 'Contact'],
             ].map(([to, label]) => (
               <li key={to}>
