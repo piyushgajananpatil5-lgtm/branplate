@@ -5,6 +5,16 @@ import { defineConfig } from "vite";
 var vite_config_default = defineConfig(() => {
   return {
     plugins: [react(), tailwindcss()],
+    esbuild: {
+      loader: "jsx",
+      include: /src\/.*\.js$/,
+      exclude: []
+    },
+    optimizeDeps: {
+      esbuildOptions: {
+        loader: { ".js": "jsx" }
+      }
+    },
     resolve: {
       alias: {
         "@": path.resolve(__dirname, ".")
