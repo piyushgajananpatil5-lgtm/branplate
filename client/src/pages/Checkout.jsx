@@ -29,23 +29,29 @@ export default function Checkout() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!user) {
-      navigate('/login');
+      navigate('/signup', { state: { returnTo: '/checkout' } });
       return;
     }
+    const whatsappWindow = window.open('about:blank', '_blank');
     setLoading(true);
     setError('');
     try {
       const items = cart.map((i) => ({
-        product: i._id,
-        name: i.name,
-        price: i.price,
+        productId: i.id || i._id,
+        packLabel: i.packLabel || i.packSizes?.[0]?.label || 'Per piece',
         quantity: i.quantity,
-        image: i.images?.[0] || '',
       }));
       const { data } = await api.post('/orders', { items, address: form, paymentMethod });
+      if (data.token) localStorage.setItem('token', data.token);
+      const order = data.order;
+      const orderLines = order.items.map((item) => `${item.productName} × ${item.quantity} — ₹${item.total}`).join('\n');
+      const whatsappText = `Hello BrannEco, I have placed order ${order.orderNumber}.\n\n${orderLines}\n\nTotal: ₹${order.total}\nName: ${form.fullName}\nPhone: ${form.phone}\nAddress: ${form.line1}, ${form.city}, ${form.state} ${form.pincode}`;
+      const whatsappUrl = `https://wa.me/919039220991?text=${encodeURIComponent(whatsappText)}`;
+      if (whatsappWindow) whatsappWindow.location.href = whatsappUrl;
       clearCart();
-      navigate(`/order/${data._id}/confirmation`);
+      navigate(`/order/${order.id || order._id}/confirmation`, { state: { emailNotificationSent: data.emailNotificationSent } });
     } catch (err) {
+      whatsappWindow?.close();
       setError(err.response?.data?.message || 'Something went wrong placing your order.');
     } finally {
       setLoading(false);

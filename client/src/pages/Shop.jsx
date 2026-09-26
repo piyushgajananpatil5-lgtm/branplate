@@ -9,7 +9,7 @@ export default function Shop() {
   const [material, setMaterial] = useState('all');
 
   useEffect(() => {
-    api.get('/products').then((res) => setProducts(res.data)).catch(() => {});
+    api.get('/products').then((res) => setProducts((res.data.products || res.data).filter((product) => product.sku))).catch(() => {});
   }, []);
 
   const filtered = material === 'all' ? products : products.filter((product) => `${product.name} ${product.description} ${product.material || ''}`.toLowerCase().includes(material));

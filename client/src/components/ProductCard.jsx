@@ -21,8 +21,8 @@ export default function ProductCard({ product }) {
     >
       <Link to={`/product/${product._id}`}>
         <div className="aspect-square bg-wheat-gold/15 rounded-2xl mb-4 flex items-center justify-center overflow-hidden">
-          {product.images && product.images[0] ? (
-            <img src={product.images[0]} alt={product.name} loading="eager" decoding="async" fetchPriority="high" className="w-full h-full object-cover" />
+            {product.images?.[0] || product.image ? (
+              <img src={product.images?.[0] || product.image} alt={product.name} loading="lazy" decoding="async" className="w-full h-full object-cover group-hover:scale-105 transition duration-500" />
           ) : (
             <span className="text-bran-brown/30 text-sm">Product image</span>
           )}

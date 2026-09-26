@@ -5,14 +5,19 @@ import path from "node:path";
 import mongoose2 from "mongoose";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import nodemailer from "nodemailer";
 import { GoogleGenAI } from "@google/genai";
+import { BRANNECO_PRODUCTS } from "./client/src/catalogue-data.js";
 
 import mongoose, { Schema } from "mongoose";
 var PlateSchema = new Schema(
   {
     id: { type: String, required: true, unique: true },
+    sku: { type: String, default: "", index: true },
     name: { type: String, required: true },
     category: { type: String, required: true },
+    material: { type: String, default: "" },
+    exportPrice: { type: Number, default: 0 },
     tagline: { type: String, default: "" },
     price: { type: Number, required: true },
     originalPrice: { type: Number },
@@ -32,6 +37,7 @@ var PlateSchema = new Schema(
     bestseller: { type: Boolean, default: false },
     image: { type: String, required: true },
     secondaryImages: [{ type: String }],
+    images: [{ type: String }],
     packSizes: [
       {
         size: { type: Number, required: true },
@@ -364,6 +370,7 @@ async function seedDatabase() {
   const adminHash = await bcrypt.hash(adminPassword, 12);
   const customerHash = await bcrypt.hash(customerPassword, 12);
   for (const p of INITIAL_PRODUCTS) await Plate.updateOne({ id: p.id }, { $setOnInsert: p }, { upsert: true });
+  for (const p of BRANNECO_PRODUCTS) await Plate.updateOne({ id: p.id }, { $setOnInsert: p }, { upsert: true });
   for (const a of INITIAL_ADMINS) {
     await Admin.updateOne(
       { email: a.email.toLowerCase() },
@@ -403,10 +410,15 @@ app.post("/api/config", adminAuth, hasPermission("edit_config"), async (req, res
   res.json({ success: true, config: publicConfig(config) });
 });
 app.get("/api/products", async (_req, res) => {
+  res.json({ success: true, products: (await Plate.find({ inStock: true }).sort({ createdAt: 1 }).lean()).map(withId) });
+});
+app.get("/api/products/admin/all", adminAuth, hasPermission("manage_products"), async (_req, res) => {
   res.json({ success: true, products: (await Plate.find().sort({ createdAt: 1 }).lean()).map(withId) });
 });
 app.get("/api/products/:id", async (req, res) => {
-  const product = await Plate.findOne({ id: req.params.id }).lean();
+  const productQuery = [{ id: req.params.id }, { sku: req.params.id }];
+  if (mongoose2.isValidObjectId(req.params.id)) productQuery.push({ _id: req.params.id });
+  const product = await Plate.findOne({ $or: productQuery }).lean();
   if (!product) return res.status(404).json({ success: false, message: "Product not found" });
   res.json({ success: true, product });
 });
@@ -414,16 +426,22 @@ app.post("/api/products", adminAuth, hasPermission("manage_products"), async (re
   const { name, price } = req.body;
   if (!name || !Number.isFinite(Number(price))) return res.status(400).json({ success: false, message: "Product name and valid base price are required" });
   const base = Number(price);
+  const sku = String(req.body.sku || `CUSTOM-${Date.now()}`).trim().toUpperCase();
+  if (await Plate.exists({ sku })) return res.status(409).json({ success: false, message: "A product with this SKU already exists." });
+  const images = Array.isArray(req.body.images) ? req.body.images.filter((image) => typeof image === "string") : [];
   const product = await Plate.create({
-    id: `bp-plate-${Date.now()}`,
+    id: sku,
+    sku,
     name: name.trim(),
-    category: req.body.category || "dinner",
+    category: req.body.category || "areca-round",
+    material: req.body.material || "Areca leaf",
+    exportPrice: Number(req.body.exportPrice) || Number((base / 83).toFixed(3)),
     tagline: req.body.tagline || "100% Biodegradable Agro-Fiber Tableware Plate",
     price: base,
     originalPrice: req.body.originalPrice ? Number(req.body.originalPrice) : Number((base * 1.2).toFixed(2)),
     rating: 5,
     reviewsCount: 0,
-    diameterOrSize: req.body.diameterOrSize || "10 inches (25.4 cm)",
+    diameterOrSize: req.body.diameterOrSize || req.body.packSize || "Per piece",
     shape: req.body.shape || "Round",
     dimensions: req.body.dimensions || "",
     heatResistance: req.body.heatResistance || "-20\xB0C to +180\xB0C",
@@ -435,12 +453,11 @@ app.post("/api/products", adminAuth, hasPermission("manage_products"), async (re
     stockCount: Number(req.body.stockCount) || 1e4,
     featured: false,
     bestseller: false,
-    image: req.body.image || "/plate.svg",
-    secondaryImages: [req.body.image || "/plate.svg"],
+    image: images[0] || req.body.image || "/plate.svg",
+    images,
+    secondaryImages: images.slice(1),
     packSizes: Array.isArray(req.body.packSizes) && req.body.packSizes.length ? req.body.packSizes : [
-      { size: 25, price: base, label: "Pack of 25 Plates", unitPrice: base / 25 },
-      { size: 50, price: Number((base * 1.84).toFixed(2)), label: "Pack of 50 Plates", unitPrice: Number((base * 1.84 / 50).toFixed(2)) },
-      { size: 100, price: Number((base * 3.35).toFixed(2)), label: "Pack of 100 Plates", unitPrice: Number((base * 3.35 / 100).toFixed(2)) }
+      { size: 1, price: base, label: "Per piece", unitPrice: base }
     ],
     description: req.body.description || "Eco-certified biodegradable plate manufactured from upcycled agricultural fibers."
   });
@@ -452,16 +469,29 @@ app.put("/api/products/:id", adminAuth, hasPermission("manage_products"), async 
   if (update.originalPrice !== void 0) update.originalPrice = Number(update.originalPrice);
   if (update.stockCount !== void 0) update.stockCount = Number(update.stockCount);
   if (update.inStock !== void 0) update.inStock = Boolean(update.inStock);
+  if (update.exportPrice !== void 0) update.exportPrice = Number(update.exportPrice);
+  if (Array.isArray(update.images)) {
+    update.image = update.images[0] || "";
+    update.secondaryImages = update.images.slice(1);
+  }
   delete update._id;
   delete update.id;
-  const product = await Plate.findOneAndUpdate({ id: req.params.id }, { $set: update }, { new: true }).lean();
+  const productQuery = [{ id: req.params.id }, { sku: req.params.id }];
+  if (mongoose2.isValidObjectId(req.params.id)) productQuery.push({ _id: req.params.id });
+  if (update.price !== void 0 && !Array.isArray(update.packSizes)) {
+    const current = await Plate.findOne({ $or: productQuery }).select("sku").lean();
+    if (current?.sku) update.packSizes = [{ size: 1, price: update.price, label: "Per piece", unitPrice: update.price }];
+  }
+  const product = await Plate.findOneAndUpdate({ $or: productQuery }, { $set: update }, { new: true }).lean();
   if (!product) return res.status(404).json({ success: false, message: "Product not found" });
   res.json({ success: true, product });
 });
 app.delete("/api/products/:id", adminAuth, hasPermission("manage_products"), async (req, res) => {
   const count = await Plate.countDocuments();
   if (count <= 1) return res.status(400).json({ success: false, message: "Cannot delete the only plate product." });
-  const result = await Plate.deleteOne({ id: req.params.id });
+  const productQuery = [{ id: req.params.id }, { sku: req.params.id }];
+  if (mongoose2.isValidObjectId(req.params.id)) productQuery.push({ _id: req.params.id });
+  const result = await Plate.deleteOne({ $or: productQuery });
   if (!result.deletedCount) return res.status(404).json({ success: false, message: "Product not found" });
   res.json({ success: true });
 });
@@ -525,6 +555,40 @@ app.get("/api/orders/:id", auth, async (req, res) => {
   if (!order) return res.status(404).json({ success: false, message: "Order not found" });
   res.json({ success: true, order: withId(order) });
 });
+async function sendOrderNotification(order) {
+  const smtpUser = process.env.GMAIL_USER;
+  const smtpPassword = process.env.GMAIL_APP_PASSWORD;
+  if (!smtpUser || !smtpPassword) return false;
+  const transporter = nodemailer.createTransport({
+    service: "gmail",
+    auth: { user: smtpUser, pass: smtpPassword },
+    connectionTimeout: 10000,
+    greetingTimeout: 10000,
+    socketTimeout: 10000
+  });
+  const lines = order.items.map((item) => `${item.productName} (${item.productId}) × ${item.quantity} · ₹${item.total}`).join("\n");
+  await transporter.sendMail({
+    from: `BrannEco Orders <${smtpUser}>`,
+    to: process.env.ORDER_NOTIFY_EMAIL || "ritiknitw7697@gmail.com",
+    replyTo: order.email,
+    subject: `New BrannEco order ${order.orderNumber}`,
+    text: [
+      `Order: ${order.orderNumber}`,
+      `Customer: ${order.customerName}`,
+      `Email: ${order.email}`,
+      `Phone: ${order.phone || "Not provided"}`,
+      `Address: ${Object.values(order.address || {}).filter(Boolean).join(", ")}`,
+      "",
+      "Items:",
+      lines,
+      "",
+      `Subtotal: ₹${order.subtotal}`,
+      `Shipping: ₹${order.shipping}`,
+      `Total: ₹${order.total}`
+    ].join("\n")
+  });
+  return true;
+}
 app.post("/api/orders", async (req, res) => {
   const { customerName, email, phone, address, items } = req.body;
   const normalized = String(email || "").trim().toLowerCase();
@@ -537,6 +601,7 @@ app.post("/api/orders", async (req, res) => {
   for (const item of items) {
     const product = byId.get(String(item.productId));
     if (!product) return res.status(400).json({ success: false, message: `Product ${item.productId} not found.` });
+    if (!product.inStock) return res.status(400).json({ success: false, message: `${product.name} is currently unavailable.` });
     const packIndex = product.packSizes.findIndex((p) => p.label === item.packLabel);
     if (packIndex < 0) return res.status(400).json({ success: false, message: "Invalid pack selection." });
     const pack = product.packSizes[packIndex];
@@ -579,7 +644,14 @@ app.post("/api/orders", async (req, res) => {
     co2SavedKg: Math.round(cleanItems.reduce((n, i) => n + i.quantity * 25, 0) * 0.12)
   } }, { new: true, upsert: true });
   const token = signToken({ sub: user.id, email: user.email, type: "user" });
-  res.status(201).json({ success: true, order: { ...order.toObject(), id: order.id, createdAt: order.createdAt }, token });
+  let emailNotificationSent = false;
+  try {
+    emailNotificationSent = await sendOrderNotification(order);
+    if (!emailNotificationSent) console.warn("Order saved; Gmail notification not sent because GMAIL_USER or GMAIL_APP_PASSWORD is not configured.");
+  } catch (error) {
+    console.error("Order saved; Gmail notification failed:", error.message);
+  }
+  res.status(201).json({ success: true, order: { ...order.toObject(), id: order.id, createdAt: order.createdAt }, token, emailNotificationSent });
 });
 function cryptoRandomPassword() {
   return `${Math.random().toString(36).slice(2)}-${Date.now()}-${Math.random().toString(36).slice(2)}`;
@@ -605,6 +677,20 @@ app.patch("/api/inquiries/:id/status", adminAuth, hasPermission("manage_inquirie
   const inquiry = await Inquiry.findByIdAndUpdate(req.params.id, { $set: { status: req.body.status } }, { new: true }).lean();
   if (!inquiry) return res.status(404).json({ success: false, message: "Inquiry not found" });
   res.json({ success: true, inquiry: withId(inquiry) });
+});
+app.post("/api/admin/auth/signup", async (req, res) => {
+  const email = String(req.body.email || "").trim().toLowerCase();
+  const bootstrapPassword = String(req.body.bootstrapPassword || "");
+  const password = String(req.body.password || "");
+  const admin = await Admin.findOne({ email });
+  if (!admin || admin.status !== "active") return res.status(403).json({ success: false, message: "This email has not been invited as an active administrator." });
+  if (password.length < 10) return res.status(400).json({ success: false, message: "Choose a password with at least 10 characters." });
+  if (!await bcrypt.compare(bootstrapPassword, admin.passwordHash)) return res.status(401).json({ success: false, message: "Temporary administrator password is incorrect." });
+  admin.passwordHash = await bcrypt.hash(password, 12);
+  admin.lastActive = new Date();
+  await admin.save();
+  const token = signToken({ sub: admin.id, email: admin.email, type: "admin", role: admin.role, permissions: admin.permissions });
+  res.json({ success: true, token, admin: { id: admin.id, name: admin.name, email: admin.email, type: "admin", role: admin.role, permissions: admin.permissions } });
 });
 app.get("/api/admins", adminAuth, async (_req, res) => {
   const admins = await Admin.find().select("-passwordHash").sort({ createdAt: 1 }).lean();

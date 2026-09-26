@@ -58,6 +58,8 @@ npm start
 
 Keep the existing `branplate-service`. Add the environment variables from `.env.example` in Render. Keep your existing `MONGO_URI` value so the same Atlas cluster/database is used.
 
+For automatic order emails, set `GMAIL_USER` to the sending Gmail account and `GMAIL_APP_PASSWORD` to a Google App Password in Render. `ORDER_NOTIFY_EMAIL` defaults to `ritiknitw7697@gmail.com`. Do not use a regular Gmail password or put mail credentials in Vite/client variables. If SMTP is not configured, orders are still saved and customers are sent to WhatsApp, but the email notification is skipped.
+
 The application is intentionally configured to fail startup if `MONGO_URI`, `JWT_SECRET`, or `ADMIN_BOOTSTRAP_PASSWORD` is missing. This prevents the previous silent in-memory fallback that made data and login appear to work but disappear after restart.
 
 ## Database bootstrap

@@ -10,15 +10,16 @@ export const AdminAuthProvider = ({ children }) => {
   });
 
   const login = async (email, password) => {
-    const { data } = await api.post('/admin/auth/login', { email, password });
+    const { data } = await api.post('/auth/login', { email, password });
+    if (data.user?.type !== 'admin') throw new Error('Administrator access required');
     localStorage.setItem('adminToken', data.token);
-    localStorage.setItem('branplate_admin', JSON.stringify(data.admin));
-    setAdmin(data.admin);
+    localStorage.setItem('branplate_admin', JSON.stringify(data.user));
+    setAdmin(data.user);
     return data;
   };
 
-  const signup = async (email, password) => {
-    const { data } = await api.post('/admin/auth/signup', { email, password });
+  const signup = async (email, password, bootstrapPassword) => {
+    const { data } = await api.post('/admin/auth/signup', { email, password, bootstrapPassword });
     localStorage.setItem('adminToken', data.token);
     localStorage.setItem('branplate_admin', JSON.stringify(data.admin));
     setAdmin(data.admin);

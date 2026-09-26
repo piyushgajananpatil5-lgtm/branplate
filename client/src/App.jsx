@@ -30,6 +30,7 @@ import AdminProducts from './pages/admin/AdminProducts';
 import AdminQueries from './pages/admin/AdminQueries';
 import AdminSettings from './pages/admin/AdminSettings';
 import WhatsAppButton from './components/WhatsAppButton';
+import BrannEco from './BrannEco';
 
 const Sustainability = lazy(() => import('./pages/Sustainability'));
 const Quote = lazy(() => import('./pages/Quote'));
@@ -73,7 +74,7 @@ export default function App() {
               </Route>
 
               {/* Storefront routes */}
-              <Route path="/" element={<StorefrontLayout><Home /></StorefrontLayout>} />
+              <Route path="/" element={<BrannEco />} />
               <Route path="/shop" element={<StorefrontLayout><Shop /></StorefrontLayout>} />
               <Route path="/product/:id" element={<StorefrontLayout><ProductDetail /></StorefrontLayout>} />
               <Route path="/cart" element={<StorefrontLayout><Cart /></StorefrontLayout>} />

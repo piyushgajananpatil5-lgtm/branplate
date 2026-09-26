@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import api from '../../api/axios';
 
-const nextStatuses = ['Order Placed', 'Packed', 'Out for Delivery', 'Delivered', 'Cancelled'];
+const nextStatuses = ['pending', 'confirmed', 'processing', 'shipped', 'delivered'];
 
 export default function AdminOrders() {
   const [tab, setTab] = useState('incomplete');
@@ -11,15 +11,18 @@ export default function AdminOrders() {
   const load = () => {
     setLoading(true);
     api
-      .get(`/orders/admin/all?type=${tab}`)
-      .then((res) => setOrders(res.data))
+      .get('/orders')
+      .then((res) => {
+        const allOrders = res.data.orders || [];
+        setOrders(allOrders.filter((order) => tab === 'completed' ? order.status === 'delivered' : order.status !== 'delivered'));
+      })
       .finally(() => setLoading(false));
   };
 
   useEffect(load, [tab]);
 
   const updateStatus = async (id, status) => {
-    await api.put(`/orders/admin/${id}/status`, { status });
+    await api.patch(`/orders/${id}/status`, { status });
     load();
   };
 
@@ -51,12 +54,12 @@ export default function AdminOrders() {
             <div key={o._id} className="bg-white border border-bran-brown/10 rounded-2xl p-5">
               <div className="flex justify-between items-start flex-wrap gap-3">
                 <div>
-                  <p className="font-semibold text-bran-brown">Order #{o._id.slice(-6).toUpperCase()}</p>
+                  <p className="font-semibold text-bran-brown">Order #{o.orderNumber || o._id?.slice(-6).toUpperCase()}</p>
                   <p className="text-sm text-bran-brown/60">
-                    {o.user?.name} ({o.user?.email}) · {new Date(o.createdAt).toLocaleString()}
+                    {o.customerName} ({o.email}) · {new Date(o.createdAt).toLocaleString()}
                   </p>
                   <p className="text-sm text-bran-brown/60 mt-1">
-                    {o.address?.line1}, {o.address?.city}, {o.address?.state} — {o.address?.pincode}
+                    {o.address?.line1 || o.address?.street}, {o.address?.city}, {o.address?.state} — {o.address?.pincode || o.address?.zip}
                   </p>
                 </div>
                 <div className="text-right">
@@ -80,7 +83,7 @@ export default function AdminOrders() {
               </div>
               <div className="mt-3 text-sm text-bran-brown/70 space-y-1">
                 {o.items.map((i, idx) => (
-                  <p key={idx}>{i.name} × {i.quantity} — ₹{i.price * i.quantity}</p>
+                  <p key={idx}>{i.productName || i.name} × {i.quantity} — ₹{i.total ?? i.price * i.quantity}</p>
                 ))}
               </div>
             </div>

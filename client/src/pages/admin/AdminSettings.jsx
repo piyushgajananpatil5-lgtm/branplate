@@ -11,14 +11,17 @@ export default function AdminSettings() {
   const [inviteMsg, setInviteMsg] = useState('');
 
   const loadAll = () => {
-    api.get('/settings/contact').then((res) => setContact(res.data));
-    api.get('/admin/auth/admins').then((res) => setAdmins(res.data));
+    api.get('/config').then((res) => {
+      const config = res.data.config || {};
+      setContact({ phone: config.contactPhone, email: config.contactEmail, address: config.contactAddress, businessHours: config.contactHours });
+    });
+    api.get('/admins').then((res) => setAdmins(res.data.admins || []));
   };
   useEffect(loadAll, []);
 
   const saveContact = async (e) => {
     e.preventDefault();
-    await api.put('/settings/contact', contact);
+    await api.post('/config', { contactPhone: contact.phone, contactEmail: contact.email, contactAddress: contact.address, contactHours: contact.businessHours });
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
   };
@@ -27,8 +30,8 @@ export default function AdminSettings() {
     e.preventDefault();
     setInviteMsg('');
     try {
-      const { data } = await api.post('/admin/auth/admins', { email: newEmail });
-      setInviteMsg(data.message);
+      const { data } = await api.post('/admins', { email: newEmail, name: newEmail.split('@')[0], role: 'operations_admin', permissions: ['manage_products', 'manage_orders', 'manage_inquiries'] });
+      setInviteMsg(data.success ? 'Admin added. Share the temporary admin password through a secure channel.' : 'Could not add admin.');
       setNewEmail('');
       loadAll();
     } catch (err) {
@@ -38,7 +41,7 @@ export default function AdminSettings() {
 
   const revokeAdmin = async (id) => {
     if (!confirm('Revoke this admin\u2019s access?')) return;
-    await api.delete(`/admin/auth/admins/${id}`);
+    await api.delete(`/admins/${id}`);
     loadAll();
   };
 
@@ -83,9 +86,9 @@ export default function AdminSettings() {
           {admins.map((a) => (
             <div key={a._id} className="flex justify-between items-center bg-white border border-bran-brown/10 rounded-xl px-4 py-2">
               <span className="text-sm text-bran-brown">
-                {a.email} {a.email === admin?.email && <span className="text-xs text-leaf-green">(you)</span>} {!a.isActive && <span className="text-xs text-red-500">(revoked)</span>}
+                {a.email} {a.email === admin?.email && <span className="text-xs text-leaf-green">(you)</span>} {a.status !== 'active' && <span className="text-xs text-red-500">(revoked)</span>}
               </span>
-              {a.isActive && a.email !== admin?.email && (
+              {a.status === 'active' && a.email !== admin?.email && (
                 <button onClick={() => revokeAdmin(a._id)} className="text-xs text-red-500">Revoke</button>
               )}
             </div>

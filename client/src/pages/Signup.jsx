@@ -1,10 +1,11 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 export default function Signup() {
   const { register } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [form, setForm] = useState({ name: '', email: '', password: '', phone: '' });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -15,7 +16,7 @@ export default function Signup() {
     setError('');
     try {
       await register(form.name, form.email, form.password, form.phone);
-      navigate('/account/orders');
+      navigate(location.state?.returnTo || '/account/orders');
     } catch (err) {
       setError(err.response?.data?.message || 'Signup failed');
     } finally {
